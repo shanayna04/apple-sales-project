@@ -26,10 +26,10 @@
 			],
 			"transformations": [
 				{
-					"name": "CleanWarranty"
+					"name": "derivedColumn1"
 				},
 				{
-					"name": "aggregate1"
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -43,11 +43,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy')) ~> CleanWarranty",
-				"CleanWarranty aggregate(groupBy(claim_id),",
-				"     claim_date = first(claim_date),",
-				"          sale_id = first(sale_id)) ~> aggregate1",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy'),",
+				"          sale_id = trim(sale_id),",
+				"          claim_id = trim(claim_id),",
+				"          repair_status = trim(repair_status)) ~> derivedColumn1",
+				"derivedColumn1 filter(!isNull(claim_date) && !isNull(sale_id) && length(trim(sale_id)) > 0) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          claim_id as string,",
@@ -67,7 +68,7 @@
 				"          claim_id,",
 				"          claim_date,",
 				"          sale_id,",
-				"          repair_status = sale_id",
+				"          repair_status",
 				"     )) ~> sink1"
 			]
 		}
