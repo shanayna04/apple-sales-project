@@ -25,9 +25,7 @@
 			},
 			{
 				"name": "launch_date",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"type": "date"
 			},
 			{
 				"name": "price",

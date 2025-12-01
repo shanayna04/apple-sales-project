@@ -30,6 +30,9 @@
 				},
 				{
 					"name": "filter1"
+				},
+				{
+					"name": "cast1"
 				}
 			],
 			"scriptLines": [
@@ -43,11 +46,14 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy'),",
-				"          sale_id = trim(sale_id),",
+				"source1 derive(sale_id = trim(sale_id),",
 				"          claim_id = trim(claim_id),",
 				"          repair_status = trim(repair_status)) ~> derivedColumn1",
-				"derivedColumn1 filter(!isNull(claim_date) && !isNull(sale_id) && length(trim(sale_id)) > 0) ~> filter1",
+				"cast1 filter(!isNull(claim_date) && !isNull(sale_id) && length(trim(sale_id)) > 0) ~> filter1",
+				"derivedColumn1 cast(output(",
+				"          claim_date as date 'MM/dd/yyyy'",
+				"     ),",
+				"     errors: true) ~> cast1",
 				"filter1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -65,7 +71,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          claim_id,",
+				"          claim_id = claim_date,",
 				"          claim_date,",
 				"          sale_id,",
 				"          repair_status",

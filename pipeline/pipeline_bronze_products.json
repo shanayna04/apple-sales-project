@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_broze_products",
+						"referenceName": "df_bronze_products",
 						"type": "DataFlowReference"
 					},
 					"compute": {

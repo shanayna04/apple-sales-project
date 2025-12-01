@@ -15,10 +15,21 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_silver_products",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "cast1"
 				}
 			],
 			"scriptLines": [
@@ -37,8 +48,28 @@
 				"source1 derive(product_name = trim(product_name),",
 				"          product_id = upper(trim(product_id)),",
 				"          category_id = upper(trim(product_id)),",
-				"          launch_date = iif(instr(launch_date, '/') > 0, toDate(launch_date, 'dd/MM/yyyy'), toDate(launch_date, 'yyyy-dd-MM')),",
-				"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1"
+				"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1",
+				"derivedColumn1 cast(output(",
+				"          launch_date as date 'MM/dd/yyyy'",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category_id as string,",
+				"          launch_date as date,",
+				"          price as decimal(10,2)",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 			]
 		}
 	}
