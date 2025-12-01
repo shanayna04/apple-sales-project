@@ -1,0 +1,45 @@
+{
+	"name": "df_silver_limpiar_products",
+	"properties": {
+		"folder": {
+			"name": "SILVER"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_bronze_products",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category_id as string,",
+				"          launch_date as string,",
+				"          price as string,",
+				"          notes as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 derive(product_name = trim(product_name),",
+				"          product_id = upper(trim(product_id)),",
+				"          category_id = upper(trim(product_id)),",
+				"          launch_date = iif(instr(launch_date, '/') > 0, toDate(launch_date, 'dd/MM/yyyy'), toDate(launch_date, 'yyyy-dd-MM')),",
+				"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1"
+			]
+		}
+	}
+}

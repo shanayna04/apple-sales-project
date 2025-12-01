@@ -16,7 +16,7 @@
 				"fileName": "products.csv",
 				"container": "bronze"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
