@@ -101,7 +101,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "df_broze_products",
+								"referenceName": "df_bronze_products",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -127,7 +127,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_broze_products')]"
+				"[concat(variables('factoryId'), '/dataflows/df_bronze_products')]"
 			]
 		},
 		{
@@ -278,6 +278,55 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_silver_category')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_limpiar_category",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_silver_limpiar_category')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipeline_silver_warranty')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -390,7 +439,7 @@
 						"fileName": "products.csv",
 						"container": "bronze"
 					},
-					"columnDelimiter": ",",
+					"columnDelimiter": ";",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
@@ -857,9 +906,7 @@
 					},
 					{
 						"name": "launch_date",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
+						"type": "date"
 					},
 					{
 						"name": "price",
@@ -1116,6 +1163,81 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/df_bronze_products')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "BRONZE"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_products_csv",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_bronze_products",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          Product_ID as string,",
+						"          Product_Name as string,",
+						"          Category_ID as string,",
+						"          Launch_Date as string,",
+						"          Price as string,",
+						"          notes as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category_id as string,",
+						"          launch_date as string,",
+						"          price as string,",
+						"          notes as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          product_id = Product_ID,",
+						"          product_name = Product_Name,",
+						"          category_id = Category_ID,",
+						"          launch_date = Launch_Date,",
+						"          price = Price,",
+						"          notes",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_products_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_products')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_bronze_sales')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1329,81 +1451,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_broze_products')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "BRONZE"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ds_bronze_products_csv",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ds_sql_bronze_products",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(output(",
-						"          Product_ID as string,",
-						"          Product_Name as string,",
-						"          Category_ID as string,",
-						"          Launch_Date as string,",
-						"          Price as string,",
-						"          notes as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> source1",
-						"source1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          product_id as string,",
-						"          product_name as string,",
-						"          category_id as string,",
-						"          launch_date as string,",
-						"          price as string,",
-						"          notes as string",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError',",
-						"     mapColumn(",
-						"          product_id = Product_ID,",
-						"          product_name = Product_Name,",
-						"          category_id = Category_ID,",
-						"          launch_date = Launch_Date,",
-						"          price = Price,",
-						"          notes",
-						"     )) ~> sink1"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_bronze_products_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_products')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_category')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1490,6 +1537,88 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_products')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "SILVER"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_bronze_products",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_silver_products",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "cast1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category_id as string,",
+						"          launch_date as string,",
+						"          price as string,",
+						"          notes as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source1 derive(product_name = trim(product_name),",
+						"          product_id = upper(trim(product_id)),",
+						"          category_id = upper(trim(product_id)),",
+						"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1",
+						"derivedColumn1 cast(output(",
+						"          launch_date as date 'MM/dd/yyyy'",
+						"     ),",
+						"     errors: true) ~> cast1",
+						"cast1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category_id as string,",
+						"          launch_date as date,",
+						"          price as decimal(10,2)",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_products')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_silver_products')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_warranty')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1523,6 +1652,9 @@
 						},
 						{
 							"name": "filter1"
+						},
+						{
+							"name": "cast1"
 						}
 					],
 					"scriptLines": [
@@ -1536,11 +1668,14 @@
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> source1",
-						"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy'),",
-						"          sale_id = trim(sale_id),",
+						"source1 derive(sale_id = trim(sale_id),",
 						"          claim_id = trim(claim_id),",
 						"          repair_status = trim(repair_status)) ~> derivedColumn1",
-						"derivedColumn1 filter(!isNull(claim_date) && !isNull(sale_id) && length(trim(sale_id)) > 0) ~> filter1",
+						"cast1 filter(!isNull(claim_date) && !isNull(sale_id) && length(trim(sale_id)) > 0) ~> filter1",
+						"derivedColumn1 cast(output(",
+						"          claim_date as date 'MM/dd/yyyy'",
+						"     ),",
+						"     errors: true) ~> cast1",
 						"filter1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
@@ -1558,7 +1693,7 @@
 						"     skipDuplicateMapOutputs: true,",
 						"     errorHandlingOption: 'stopOnFirstError',",
 						"     mapColumn(",
-						"          claim_id,",
+						"          claim_id = claim_date,",
 						"          claim_date,",
 						"          sale_id,",
 						"          repair_status",
@@ -1570,44 +1705,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_warranty')]",
 				"[concat(variables('factoryId'), '/datasets/ds_sql_silver_warranty')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline_')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "SILVER"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
 		}
 	]
 }
