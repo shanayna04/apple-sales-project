@@ -25,7 +25,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "ds_warranty_csv",
+								"referenceName": "ds_bronze_warranty_csv",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -34,7 +34,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_sql_warranty",
+								"referenceName": "ds_sql_bronze_warranty",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -91,7 +91,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "ds_products_csv",
+								"referenceName": "ds_bronze_products_csv",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -100,7 +100,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_sql_products",
+								"referenceName": "ds_sql_bronze_products",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -144,6 +144,84 @@
 						"          launch_date = Launch_Date,",
 						"          price = Price,",
 						"          notes",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_warranty')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "SILVER"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_bronze_warranty",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_silver_warranty",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CleanWarranty"
+						},
+						{
+							"name": "aggregate1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          claim_id as string,",
+						"          claim_date as string,",
+						"          sale_id as string,",
+						"          repair_status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy')) ~> CleanWarranty",
+						"CleanWarranty aggregate(groupBy(claim_id),",
+						"     claim_date = first(claim_date),",
+						"          sale_id = first(sale_id)) ~> aggregate1",
+						"aggregate1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          claim_id as string,",
+						"          claim_date as timestamp,",
+						"          sale_id as string,",
+						"          repair_status as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          claim_id,",
+						"          claim_date,",
+						"          sale_id,",
+						"          repair_status = sale_id",
 						"     )) ~> sink1"
 					]
 				}

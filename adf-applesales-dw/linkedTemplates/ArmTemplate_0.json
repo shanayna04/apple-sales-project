@@ -68,7 +68,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_category_csv')]",
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_category_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -112,7 +112,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_products_csv')]",
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_products_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -168,7 +168,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sales_csv')]",
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_sales_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -220,7 +220,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_category')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_category')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -257,7 +257,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_products')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_products')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -306,7 +306,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_sales')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_sales')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -481,7 +481,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_stores')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_stores')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -526,7 +526,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_warranty')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_warranty')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -567,7 +567,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_stores_csv')]",
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_stores_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -619,7 +619,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_warranty_csv')]",
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_warranty_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -710,7 +710,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sqsilver_stores')]",
+			"name": "[concat(parameters('factoryName'), '/ds_sql_silver_stores')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -768,7 +768,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "ds_category_csv",
+								"referenceName": "ds_bronze_category_csv",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -777,7 +777,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_sql_category",
+								"referenceName": "ds_sql_bronze_category",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -817,8 +817,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_category_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_sql_category')]"
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_category_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_category')]"
 			]
 		},
 		{
@@ -834,7 +834,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "ds_sales_csv",
+								"referenceName": "ds_bronze_sales_csv",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -843,7 +843,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_sql_sales",
+								"referenceName": "ds_sql_bronze_sales",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -889,8 +889,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_sales_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_sql_sales')]"
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_sales_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_sales')]"
 			]
 		},
 		{
@@ -906,7 +906,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "ds_stores_csv",
+								"referenceName": "ds_bronze_stores_csv",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -915,7 +915,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_sql_stores",
+								"referenceName": "ds_sql_bronze_stores",
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
@@ -961,8 +961,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_stores_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_sql_stores')]"
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_stores_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_stores')]"
 			]
 		}
 	]
