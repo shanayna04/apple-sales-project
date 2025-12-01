@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "ds_category_csv",
+						"referenceName": "ds_bronze_category_csv",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_sql_category",
+						"referenceName": "ds_sql_bronze_category",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"

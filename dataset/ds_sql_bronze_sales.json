@@ -1,5 +1,5 @@
 {
-	"name": "ds_sql_sales",
+	"name": "ds_sql_bronze_sales",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_sql_dw_apple",

@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "ds_sales_csv",
+						"referenceName": "ds_bronze_sales_csv",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_sql_sales",
+						"referenceName": "ds_sql_bronze_sales",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"

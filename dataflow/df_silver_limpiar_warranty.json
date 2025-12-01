@@ -1,15 +1,15 @@
 {
-	"name": "df_bronze_warranty",
+	"name": "df_silver_limpiar_warranty",
 	"properties": {
 		"folder": {
-			"name": "BRONZE"
+			"name": "SILVER"
 		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "ds_bronze_warranty_csv",
+						"referenceName": "ds_sql_bronze_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -18,13 +18,20 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_sql_bronze_warranty",
+						"referenceName": "ds_sql_silver_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "CleanWarranty"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          claim_id as string,",
@@ -34,12 +41,17 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 sink(allowSchemaDrift: true,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 derive(claim_date = toDate(claim_date, 'MM/dd/yyyy')) ~> CleanWarranty",
+				"CleanWarranty aggregate(groupBy(claim_id),",
+				"     claim_date = first(claim_date),",
+				"          sale_id = first(sale_id)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          claim_id as string,",
-				"          claim_date as string,",
+				"          claim_date as timestamp,",
 				"          sale_id as string,",
 				"          repair_status as string",
 				"     ),",
@@ -55,7 +67,7 @@
 				"          claim_id,",
 				"          claim_date,",
 				"          sale_id,",
-				"          repair_status",
+				"          repair_status = sale_id",
 				"     )) ~> sink1"
 			]
 		}

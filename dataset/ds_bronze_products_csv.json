@@ -1,5 +1,5 @@
 {
-	"name": "ds_products_csv",
+	"name": "ds_bronze_products_csv",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_sa_apple",
