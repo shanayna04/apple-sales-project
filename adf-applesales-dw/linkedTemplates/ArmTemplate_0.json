@@ -68,6 +68,44 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_bronze_category_csv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -220,6 +258,106 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_stores_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sa_apple",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "BRONZE"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "stores.csv",
+						"container": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Store_ID",
+						"type": "String"
+					},
+					{
+						"name": "Store_Name",
+						"type": "String"
+					},
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "Country",
+						"type": "String"
+					},
+					{
+						"name": "opened",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sa_apple')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_bronze_warranty_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sa_apple",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "BRONZE"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "warranty.csv",
+						"container": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "claim_id",
+						"type": "String"
+					},
+					{
+						"name": "claim_date",
+						"type": "String"
+					},
+					{
+						"name": "sale_id",
+						"type": "String"
+					},
+					{
+						"name": "repair_status",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sa_apple')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_category')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -344,6 +482,92 @@
 				"typeProperties": {
 					"schema": "bronze",
 					"table": "sales"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_stores')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw_apple",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "BRONZE"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "store_id",
+						"type": "nvarchar"
+					},
+					{
+						"name": "store_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "city",
+						"type": "nvarchar"
+					},
+					{
+						"name": "country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "opened",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "bronze",
+					"table": "stores"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_warranty')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw_apple",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "BRONZE"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "claim_id",
+						"type": "nvarchar"
+					},
+					{
+						"name": "claim_date",
+						"type": "nvarchar"
+					},
+					{
+						"name": "sale_id",
+						"type": "nvarchar"
+					},
+					{
+						"name": "repair_status",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "bronze",
+					"table": "warranty"
 				}
 			},
 			"dependsOn": [
@@ -481,235 +705,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_stores')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_sql_dw_apple",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "BRONZE"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "store_id",
-						"type": "nvarchar"
-					},
-					{
-						"name": "store_name",
-						"type": "nvarchar"
-					},
-					{
-						"name": "city",
-						"type": "nvarchar"
-					},
-					{
-						"name": "country",
-						"type": "nvarchar"
-					},
-					{
-						"name": "opened",
-						"type": "nvarchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "bronze",
-					"table": "stores"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_bronze_warranty')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_sql_dw_apple",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "BRONZE"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "claim_id",
-						"type": "nvarchar"
-					},
-					{
-						"name": "claim_date",
-						"type": "nvarchar"
-					},
-					{
-						"name": "sale_id",
-						"type": "nvarchar"
-					},
-					{
-						"name": "repair_status",
-						"type": "nvarchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "bronze",
-					"table": "warranty"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_bronze_stores_csv')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_sa_apple",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "BRONZE"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "stores.csv",
-						"container": "bronze"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "Store_ID",
-						"type": "String"
-					},
-					{
-						"name": "Store_Name",
-						"type": "String"
-					},
-					{
-						"name": "City",
-						"type": "String"
-					},
-					{
-						"name": "Country",
-						"type": "String"
-					},
-					{
-						"name": "opened",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_sa_apple')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_bronze_warranty_csv')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_sa_apple",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "BRONZE"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "warranty.csv",
-						"container": "bronze"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "claim_id",
-						"type": "String"
-					},
-					{
-						"name": "claim_date",
-						"type": "String"
-					},
-					{
-						"name": "sale_id",
-						"type": "String"
-					},
-					{
-						"name": "repair_status",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_sa_apple')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sql_silver_warranty')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_sql_dw_apple",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "SILVER"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "claim_id",
-						"type": "varchar"
-					},
-					{
-						"name": "claim_date",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "sale_id",
-						"type": "varchar"
-					},
-					{
-						"name": "repair_status",
-						"type": "varchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "silver",
-					"table": "warranty"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/ds_sql_silver_stores')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -749,6 +744,49 @@
 				"typeProperties": {
 					"schema": "silver",
 					"table": "stores"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw_apple')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sql_silver_warranty')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw_apple",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "claim_id",
+						"type": "varchar"
+					},
+					{
+						"name": "claim_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "sale_id",
+						"type": "varchar"
+					},
+					{
+						"name": "repair_status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "silver",
+					"table": "warranty"
 				}
 			},
 			"dependsOn": [
@@ -891,78 +929,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_bronze_sales_csv')]",
 				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_sales')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_bronze_stores')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "BRONZE"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ds_bronze_stores_csv",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ds_sql_bronze_stores",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(output(",
-						"          Store_ID as string,",
-						"          Store_Name as string,",
-						"          City as string,",
-						"          Country as string,",
-						"          opened as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> source1",
-						"source1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          store_id as string,",
-						"          store_name as string,",
-						"          city as string,",
-						"          country as string,",
-						"          opened as string",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError',",
-						"     mapColumn(",
-						"          store_id = Store_ID,",
-						"          store_name = Store_Name,",
-						"          city = City,",
-						"          country = Country,",
-						"          opened",
-						"     )) ~> sink1"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_bronze_stores_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_stores')]"
 			]
 		}
 	]
