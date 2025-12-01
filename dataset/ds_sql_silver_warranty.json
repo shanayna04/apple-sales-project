@@ -1,0 +1,38 @@
+{
+	"name": "ds_sql_silver_warranty",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SILVER"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "claim_id",
+				"type": "varchar"
+			},
+			{
+				"name": "claim_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "sale_id",
+				"type": "varchar"
+			},
+			{
+				"name": "repair_status",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "silver",
+			"table": "warranty"
+		}
+	}
+}
