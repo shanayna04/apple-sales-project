@@ -1,0 +1,33 @@
+{
+	"name": "ds_gold_dimCategory",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "GOLD"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id_category",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "category",
+				"type": "varchar"
+			},
+			{
+				"name": "category_name",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_category"
+		}
+	}
+}
