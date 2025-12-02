@@ -47,10 +47,10 @@
 				"     format: 'table') ~> source1",
 				"source1 derive(product_name = trim(product_name),",
 				"          product_id = upper(trim(product_id)),",
-				"          category_id = upper(trim(product_id)),",
+				"          category_id = upper(trim(category_id)),",
 				"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1",
 				"derivedColumn1 cast(output(",
-				"          launch_date as date 'MM/dd/yyyy'",
+				"          launch_date as date 'dd/MM/yyyy'",
 				"     ),",
 				"     errors: true) ~> cast1",
 				"cast1 sink(allowSchemaDrift: true,",
@@ -69,7 +69,14 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          product_id,",
+				"          product_name,",
+				"          category_id,",
+				"          launch_date,",
+				"          price",
+				"     )) ~> sink1"
 			]
 		}
 	}
