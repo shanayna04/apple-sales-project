@@ -327,6 +327,104 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_silver_products')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_limpiar_products",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_silver_limpiar_products')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_silver_sales')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_limpiar_sales",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_silver_limpiar_sales')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipeline_silver_warranty')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1587,10 +1685,10 @@
 						"     format: 'table') ~> source1",
 						"source1 derive(product_name = trim(product_name),",
 						"          product_id = upper(trim(product_id)),",
-						"          category_id = upper(trim(product_id)),",
+						"          category_id = upper(trim(category_id)),",
 						"          price = toDecimal(replace(price, ',', '.'))) ~> derivedColumn1",
 						"derivedColumn1 cast(output(",
-						"          launch_date as date 'MM/dd/yyyy'",
+						"          launch_date as date 'dd/MM/yyyy'",
 						"     ),",
 						"     errors: true) ~> cast1",
 						"cast1 sink(allowSchemaDrift: true,",
@@ -1609,13 +1707,189 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          product_id,",
+						"          product_name,",
+						"          category_id,",
+						"          launch_date,",
+						"          price",
+						"     )) ~> sink1"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_products')]",
 				"[concat(variables('factoryId'), '/datasets/ds_sql_silver_products')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_sales')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "SILVER"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_bronze_sales_csv",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_silver_sales",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "cast1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          sale_id as string,",
+						"          sale_date as string,",
+						"          store_id as string,",
+						"          product_id as string,",
+						"          quantity as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source1 derive(sale_id = trim(sale_id),",
+						"          store_id = upper(trim(store_id)),",
+						"          product_id = upper(trim(product_id))) ~> derivedColumn1",
+						"derivedColumn1 cast(output(",
+						"          sale_date as date 'dd/MM/yyyy',",
+						"          quantity as integer",
+						"     ),",
+						"     errors: true) ~> cast1",
+						"cast1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          sale_id as string,",
+						"          sale_date as timestamp,",
+						"          store_id as string,",
+						"          product_id as string,",
+						"          quantity as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          sale_id,",
+						"          sale_date,",
+						"          store_id,",
+						"          product_id,",
+						"          quantity",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_bronze_sales_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_silver_sales')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_silver_limpiar_stores')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "SILVER"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_bronze_stores",
+								"type": "DatasetReference"
+							},
+							"name": "SourceStores"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_sql_silver_stores",
+								"type": "DatasetReference"
+							},
+							"name": "SinkStoresSilver"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CleanStoreNames"
+						},
+						{
+							"name": "FilterBadData"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          store_id as string,",
+						"          store_name as string,",
+						"          city as string,",
+						"          country as string,",
+						"          opened as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> SourceStores",
+						"SourceStores derive(store_name = replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"),",
+						"          country = trim(country)) ~> CleanStoreNames",
+						"CleanStoreNames filter(length(store_name) > 3 && !isNull(store_name)) ~> FilterBadData",
+						"FilterBadData sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          store_id as string,",
+						"          store_name as string,",
+						"          city as string,",
+						"          country as string,",
+						"          opened as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          store_id,",
+						"          store_name,",
+						"          city,",
+						"          country",
+						"     )) ~> SinkStoresSilver"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_sql_bronze_stores')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sql_silver_stores')]"
 			]
 		},
 		{
