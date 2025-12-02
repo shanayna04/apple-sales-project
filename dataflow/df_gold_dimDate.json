@@ -1,0 +1,99 @@
+{
+	"name": "df_gold_dimDate",
+	"properties": {
+		"folder": {
+			"name": "GOLD"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_silver_sales",
+						"type": "DatasetReference"
+					},
+					"name": "dateSale"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_silver_warranty",
+						"type": "DatasetReference"
+					},
+					"name": "dateWarranty"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_gold_dimDate",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select distinct sale_date as date from silver.sales',",
+				"     format: 'query') ~> dateSale",
+				"source(output(",
+				"          date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select distinct claim_date as date from silver.warranty',",
+				"     format: 'query') ~> dateWarranty",
+				"dateSale, dateWarranty union(byName: true)~> union1",
+				"union1 sort(asc(date, true)) ~> sort1",
+				"sort1 filter(!isNull(date)) ~> filter1",
+				"filter1 aggregate(groupBy(date),",
+				"     each(match(name != \"date\"), $$ = first($$))) ~> aggregate1",
+				"aggregate1 derive(year = year(date),",
+				"          month = month(date)) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_date as integer,",
+				"          date_full as date,",
+				"          year as integer,",
+				"          month as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          date_full = date,",
+				"          year,",
+				"          month",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
