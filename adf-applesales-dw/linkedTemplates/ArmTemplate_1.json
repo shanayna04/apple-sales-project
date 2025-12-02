@@ -448,7 +448,7 @@
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> SourceStores",
-						"SourceStores derive(store_name = replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"),",
+						"SourceStores derive(store_name = left(replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"), 50),",
 						"          country = trim(country)) ~> CleanStoreNames",
 						"CleanStoreNames filter(length(store_name) > 3 && !isNull(store_name)) ~> FilterBadData",
 						"FilterBadData sink(allowSchemaDrift: true,",
@@ -997,6 +997,55 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/df_silver_limpiar_warranty')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_silver_stores')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_silver_limpiar_stores",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceStores": {},
+									"SinkStoresSilver": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SILVER"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_silver_limpiar_stores')]"
 			]
 		}
 	]
