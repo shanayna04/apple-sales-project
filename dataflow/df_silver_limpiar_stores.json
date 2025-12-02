@@ -44,7 +44,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> SourceStores",
-				"SourceStores derive(store_name = replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"),",
+				"SourceStores derive(store_name = left(replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"), 50),",
 				"          country = trim(country)) ~> CleanStoreNames",
 				"CleanStoreNames filter(length(store_name) > 3 && !isNull(store_name)) ~> FilterBadData",
 				"FilterBadData sink(allowSchemaDrift: true,",
