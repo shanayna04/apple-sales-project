@@ -1,0 +1,9 @@
+{
+	"name": "pipeline_dimCategory",
+	"properties": {
+		"folder": {
+			"name": "GOLD"
+		},
+		"annotations": []
+	}
+}
