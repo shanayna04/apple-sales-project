@@ -15,8 +15,23 @@
 					"name": "SourceStores"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_silver_stores",
+						"type": "DatasetReference"
+					},
+					"name": "SinkStoresSilver"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CleanStoreNames"
+				},
+				{
+					"name": "FilterBadData"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          store_id as string,",
@@ -28,7 +43,33 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> SourceStores"
+				"     format: 'table') ~> SourceStores",
+				"SourceStores derive(store_name = replace(replace(toString(store_name), \"'\", \"\"), '\"', \"\"),",
+				"          country = trim(country)) ~> CleanStoreNames",
+				"CleanStoreNames filter(length(store_name) > 3 && !isNull(store_name)) ~> FilterBadData",
+				"FilterBadData sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          store_id as string,",
+				"          store_name as string,",
+				"          city as string,",
+				"          country as string,",
+				"          opened as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          store_id,",
+				"          store_name,",
+				"          city,",
+				"          country",
+				"     )) ~> SinkStoresSilver"
 			]
 		}
 	}
